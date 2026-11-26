@@ -282,7 +282,7 @@ body.noScore:not(.noBgG) #wrap{--gtrop:.55}
 #phc button:hover,#phc button:active,#phc button:focus-visible{opacity:1}
 body.noScore #phc,.sx #s-stage.fs>#phc,.sx .fscorner,#qRec,#lensBtn{display:none!important}
 .sx #s-stage.phone #sxRow{display:none!important}
-.sx #s-stage.phone #fret{max-height:28vh;width:auto!important}
+.sx #s-stage.fs #fret{height:auto!important;max-width:100%}.sx #s-stage.fs #fretRow{justify-content:center}.sx #s-stage.fs #fretWrap{overflow:visible}
 /* tema chitarra classica: legno chiaro */
 body.wood{--card:#fffaf1;--soft:#efdfc3;--line:#dcc39a;background:#f7ecd9 repeating-linear-gradient(90deg,rgba(139,90,43,.04) 0 2px,transparent 2px 11px)}
 body.wood header{background:linear-gradient(180deg,#f4e4c6,#ebd3a9)!important;border-bottom:1px solid #d6b685}
@@ -4563,6 +4563,9 @@ function sxShow(ms,chord){
   $('noteInfo').innerHTML=(chord?'<b>Accordo di '+chord+'</b> · ':'')+'note: <b>'+ms.map(m=>NMI[m%12]).join(' ')+'</b><br><small>corde 6→1: '+shapeText(fr)+'</small>';
   if(anim) handsChord(fr);
 }
+function fsFret(){ const st=$('s-stage'); if(!st||!st.classList.contains('fs')) return; const sv=$('fret'), vb=sv.viewBox.baseVal, r=(vb&&vb.height)?vb.width/vb.height:4;
+  sv.style.width=Math.round(Math.max(260,Math.min(window.innerWidth-110,Math.min(window.innerHeight*0.32,240)*r)))+'px'; }
+window.addEventListener('resize',()=>setTimeout(fsFret,60));
 let fretIm=null, fretBusy=false, fretT=0;
 function fretImg(){ const t=performance.now(); if(!fretBusy&&t-fretT>80){ fretT=t; fretBusy=true; const sv=$('fret'), vb=sv.viewBox.baseVal;
   svgImg(sv,vb&&vb.width?vb.width:1000,vb&&vb.height?vb.height:240,im=>{ if(im) fretIm=im; fretBusy=false; }); } return fretIm; }
@@ -4572,7 +4575,7 @@ window.APP={
   sxState(p){ if(playing!==p){ playing=p; setPlayUI(); } },
   sxBpm(b){ $('bpm').value=b; $('bpmVal').textContent=b+' · '+(TEMPO_NAMES.find(t=>b<t[0])||TEMPO_NAMES[TEMPO_NAMES.length-1])[1]; },
   loop:()=>!!S.loop, metro:()=>!!S.metro, click:s=>{ try{ metroClick(s); }catch(e){} },
-  layout:()=>{ layout(); applyPanelH(); }
+  layout:()=>{ layout(); applyPanelH(); fsFret(); }
 };
 
 /* comandi raccolti in ordine */
