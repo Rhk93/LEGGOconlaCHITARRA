@@ -1,0 +1,102 @@
+name: Crea le app SUONA
+
+on:
+  push:
+    paths: ['SUONA-app.zip']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Estrai lo zip
+        run: unzip -o SUONA-app.zip -d src
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Metti l'app nel progetto Android
+        run: |
+          mkdir -p src/android/app/src/main/assets
+          cp -r src/www/* src/android/app/src/main/assets/
+      - name: Compila l'APK
+        working-directory: src/android
+        env:
+          VC: ${{ github.run_number }}
+        run: gradle assembleRelease --no-daemon
+      - run: cp src/android/app/build/outputs/apk/release/app-release.apk SUONA-Android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: SUONA-Android.apk
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Estrai lo zip
+        shell: pwsh
+        run: |
+          Expand-Archive SUONA-app.zip -DestinationPath src
+          Copy-Item -Recurse src/www src/desktop/www
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Crea il programma per Windows
+        working-directory: src/desktop
+        run: |
+          npm install
+          npx electron-builder --win --x64 --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: src/desktop/dist/*.exe
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Estrai lo zip
+        run: |
+          unzip -o SUONA-app.zip -d src
+          cp -R src/www src/desktop/www
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Crea l'app per Mac
+        working-directory: src/desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          npm install
+          npx electron-builder --mac dmg --x64 --arm64 --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mac
+          path: src/desktop/dist/*.dmg
+
+  release:
+    needs: [android, windows, mac]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: out
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.${{ github.run_number }}
+          name: SUONA ${{ github.run_number }}
+          body: |
+            SUONA! · Spartito → Chitarra
+            - Android: SUONA-Android.apk
+            - Windows: SUONA-Windows-Installazione.exe (si installa) oppure SUONA-Windows-Portatile.exe (si apre senza installare)
+            - Mac: SUONA-Mac-arm64.dmg (Mac con chip Apple M1/M2/M3/M4) oppure SUONA-Mac-x64.dmg (Mac Intel)
+          files: out/*
