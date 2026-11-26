@@ -320,7 +320,7 @@ body.wood #playBar,body.wood #measBar,body.wood #empty{background:#fffaf1}
 /* mentre suona: solo spartito, chitarra, ▶ ⏸ ⏹, velocità e solo manico */
 body.isPlaying header,body.isPlaying #sxRow,body.isPlaying #s-ctrl,body.isPlaying #s-brkhint,body.isPlaying #row,body.isPlaying #playBar,body.isPlaying #measBar,body.isPlaying #zoneBar,body.isPlaying #msg,body.isPlaying #nmBar,body.isPlaying #copyFoot,body.isPlaying #miniBar,body.isPlaying #grip{display:none!important}
 body.isPlaying #quickBar:not(.show)>#tempo{display:flex!important}
-body.isPlaying #quickBar:not(.show)>#neckOnly{display:inline-flex!important}
+#neckOnly,#recBar{display:none!important}
 /* spartiti MuseScore / MusicXML: stessa schermata, stesso manico */
 .sx{--sun:#ffc93c;--teal:var(--main);--paper:#fffdf8;--staff:#9aa0b8;--note:#1d2340;--stage:#16244a;font-family:var(--font)}
 #sxMain{flex:1;display:flex;flex-direction:column;min-height:0;gap:.4rem}
@@ -3337,7 +3337,7 @@ $('loopBtn').onclick=()=>{S.loop=!S.loop;save();$('loopBtn').classList.toggle('o
 $('ovBtn').onclick=()=>{S.showOv=!S.showOv;save();$('ovBtn').classList.toggle('on',S.showOv);if(S.showOv&&loaded&&!scanned)scanScore();drawOverlay();};
 $('playBtn').onclick=()=>playing?pause():play();
 $('stopBtn').onclick=()=>stop();
-function setPlayUI(){const t=playing?'⏸':'▶';$('playBtn').textContent=t;$('qPlay').classList.toggle('on',playing); if(document.body.classList.contains('isPlaying')!==!!playing){ const go=()=>{ document.body.classList.toggle('isPlaying',playing); if(!playing) $('quickBar').classList.remove('show'); setTimeout(()=>{ applyPanelH(); if(S.lens) lensDraw(); },50); };
+function setPlayUI(){ if(!!S.onlyNeck!==!!playing) setOnlyNeck(!!playing);const t=playing?'⏸':'▶';$('playBtn').textContent=t;$('qPlay').classList.toggle('on',playing); if(document.body.classList.contains('isPlaying')!==!!playing){ const go=()=>{ document.body.classList.toggle('isPlaying',playing); if(!playing) $('quickBar').classList.remove('show'); setTimeout(()=>{ applyPanelH(); if(S.lens) lensDraw(); },50); };
   if(playing) go(); else setTimeout(go,180); }   /* dopo pausa/stop la barra intera torna quando il tocco è finito */ $('miniPlay').textContent=t;$('hPlay').textContent=t;}
 $('miniPlay').onclick=$('hPlay').onclick=()=>playing?pause():play();
 $('hStop').onclick=()=>stop();
@@ -4494,7 +4494,7 @@ function setChordMode(m){S.chordNames=m;save();refreshNm();document.querySelecto
 document.querySelectorAll('[data-chm]').forEach(b=>{b.onclick=()=>setChordMode(b.dataset.chm); b.classList.toggle('on',b.dataset.chm===chordMode());});
 function setDyn(v){S.dyn=v;save();$('dynOn').classList.toggle('on',v);$('dynOff').classList.toggle('on',!v);if(loaded&&scanned)buildSeq();}
 $('dynOn').onclick=()=>setDyn(true); $('dynOff').onclick=()=>setDyn(false); $('dynOn').classList.toggle('on',S.dyn!==false); $('dynOff').classList.toggle('on',S.dyn===false);
-applyPanelH(); applyLook(); refreshZoneUI(); setBpm(S.bpm); setMetro(!!S.metro); $('metroVol').value=S.metroVol??60; setOnlyNeck(!!S.onlyNeck); $('rhythm').value=S.rhythm; soundLabel(); document.querySelectorAll('[data-sound]').forEach(b=>b.classList.toggle('on',b.dataset.sound===S.sound)); $('meterSel').value=S.meter||'auto'; $('namesBtn').onclick=()=>setNames(!S.showNames); $('mNames').onclick=()=>setNames(!S.showNames); ['namesBtn','mNames'].forEach(id=>$(id).classList.toggle('on',!!S.showNames)); $('namesOn').classList.toggle('on',!!S.showNames); $('namesOff').classList.toggle('on',!S.showNames); $('loopBtn').classList.toggle('on',S.loop); $('ovBtn').classList.toggle('on',S.showOv);
+applyPanelH(); applyLook(); refreshZoneUI(); setBpm(S.bpm); setMetro(!!S.metro); $('metroVol').value=S.metroVol??60; S.onlyNeck=false; setOnlyNeck(false); $('rhythm').value=S.rhythm; soundLabel(); document.querySelectorAll('[data-sound]').forEach(b=>b.classList.toggle('on',b.dataset.sound===S.sound)); $('meterSel').value=S.meter||'auto'; $('namesBtn').onclick=()=>setNames(!S.showNames); $('mNames').onclick=()=>setNames(!S.showNames); ['namesBtn','mNames'].forEach(id=>$(id).classList.toggle('on',!!S.showNames)); $('namesOn').classList.toggle('on',!!S.showNames); $('namesOff').classList.toggle('on',!S.showNames); $('loopBtn').classList.toggle('on',S.loop); $('ovBtn').classList.toggle('on',S.showOv);
 
 $('arpBtn').classList.toggle('on',!!S.arp);
 if(S.lens){ S.lens=1; setTimeout(applyLens,0); }
