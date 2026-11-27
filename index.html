@@ -4996,13 +4996,14 @@ function renderSheet(){
  if(!VS.length){host.innerHTML='<div class="msg">Tutti gli strumenti sono nascosti: in basso, in «Strumenti», tocca «Vedi» su quelli che ti interessano.</div>';return}
  const W=$('sheet').clientWidth-8;if(W<100)return;lastW=W;host.innerHTML='';
  const VF=Vex.Flow,LW=W/sz,S=VS.length,SH=rgF*(lblMode==='none'?100:(lblMode==='note'?150:130)+(LK()-1)*70),top=104,nM=VS[0].ms.length;
- const ws=[];for(let mi=0;mi<nM;mi++){let c=0;VS.forEach(st=>{const M=st.ms[mi];if(M)M.voices.forEach(v=>c=Math.max(c,v.length))});ws.push(Math.max(110,60+30*c)*spF)}
+ const ws=[];for(let mi=0;mi<nM;mi++){let c=0;VS.forEach(st=>{const M=st.ms[mi];if(M){const T=new Set();M.voices.forEach(v=>v.forEach(it=>T.add(Math.round(it.s*1e3))));c=Math.max(c,T.size)}});ws.push(Math.max(120,70+(lblMode==='none'?34:Math.max(36,44*LK()))*c)*spF)}
  const modW=mi=>45+Math.abs(VS[0].ms[mi].key)*10+(mi===0?30:0);
  const rows=[];let row=[],used=0;
  const CR=rowsFor()||(bpr<0&&!phone&&score.frows)||null;let m0=0;
  if(CR){for(const c of CR){if(m0>=nM)break;const k=Math.max(1,Math.min(c,nM-m0));rows.push([...Array(k).keys()].map(q=>m0+q));m0+=k}}
  if(bpr>0)for(let i=m0;i<nM;i+=bpr)rows.push([...Array(Math.min(bpr,nM-i)).keys()].map(k=>i+k));
  else{for(let mi=m0;mi<nM;mi++){const w=ws[mi]+(row.length?0:modW(mi));if(row.length&&used+w>LW-20){rows.push(row);row=[];used=0;mi--;continue}row.push(mi);used+=w}if(row.length)rows.push(row)}
+ {const av=LW-32,out=[];rows.forEach(R=>{let cr=[],u=0;R.forEach(mi=>{const w=ws[mi]+(cr.length?0:modW(mi));if(cr.length&&u+w>av){out.push(cr);cr=[mi];u=ws[mi]+modW(mi)}else{cr.push(mi);u+=w}});if(cr.length)out.push(cr)});rows.length=0;rows.push(...out)}
  lastRows=rows;
  if(brkEdit){const C=rowsFor()||[];$('brkrows').innerHTML=rows.map((R,i)=>`<div class="brow${i<C.length?' fix':''}"><span>Rigo ${i+1}</span><button data-r="${i}" data-d="-1" aria-label="Una battuta in meno">−</button><b>${R.length}</b><button data-r="${i}" data-d="1" aria-label="Una battuta in più">+</button><small>battute ${R[0]+1}–${R[R.length-1]+1}</small></div>`).join('')}
  const yo=[];let yy=0;VS.forEach((st,si)=>{if(si&&st.pi!==VS[si-1].pi)yy+=34;yo.push(yy);yy+=SH});const X0=S>1?22:10,PN=[];
@@ -5016,7 +5017,7 @@ function renderSheet(){
   const CB=CR;const fill=CB?(ri===rows.length-1&&ri>0&&row.length<rows[ri-1].length?(LW-X0-10)*(row.length/rows[ri-1].length)/sum:(LW-X0-10)/sum):bpr>0?(LW-X0-10)*(row.length/bpr)/sum:(ri<rows.length-1||sum>LW*.7)?(LW-X0-10)/sum:1;
   let x=X0;const y0=top+ri*rowH;
   row.forEach((mi,ci)=>{
-   const w=base[ci]*fill;
+   const w=base[ci]*((ri===rows.length-1&&sum<(LW-X0-10)*.7)?1:(LW-X0-10)/sum);
    const sts=VS.map((st,si)=>{
     const M=st.ms[mi]||st.ms[st.ms.length-1],P=st.ms[mi-1],s=new VF.Stave(x,y0+yo[si],w);
     if(ci===0||(P&&P.clef!==M.clef))s.addClef(M.clef);
