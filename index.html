@@ -277,7 +277,8 @@ body.noScore:not(.noBgG) #wrap{background:url("data:image/svg+xml,%3Csvg%20xmlns
 body.noScore:not(.noBgG) #wrap{--gtrop:.55}
 /* pulsanti trasparenti sullo spartito */
 #phc{position:sticky;top:6px;z-index:25;height:0;display:flex;gap:6px;width:max-content;margin-left:2px}
-#s-stage>#phc{position:absolute;top:8px;left:8px;height:auto;margin:0}
+#s-stage>#phc{position:absolute;top:8px;left:auto;right:8px;height:auto;margin:0}
+#wrap>#phc{margin-left:auto;margin-right:2px}
 #phc button{background:rgba(255,255,255,.4)!important;color:#1c1c1e!important;border:1px solid rgba(0,0,0,.15)!important;box-shadow:none!important;opacity:.5;min-height:36px;padding:.3rem .6rem;border-radius:.7rem;font-size:.9rem;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
 #phc button:hover,#phc button:active,#phc button:focus-visible{opacity:1}
 body.noScore #phc,.sx #s-stage.fs>#phc,.sx .fscorner,#qRec,#lensBtn{display:none!important}
@@ -343,6 +344,11 @@ body.sxMode #panel{flex:0 1 auto}
 .sx #s-stage.fs .bar{flex:none;flex-wrap:nowrap;max-height:none;overflow:visible;padding:6px 8px}
 .sx #s-stage.fs #s-ctrl{flex:1 1 auto;flex-wrap:nowrap;gap:8px}
 .sx #s-stage.fs #s-fsm{display:none!important}
+body.isPlaying .sx #s-stage.fs #s-ctrl{display:flex!important}
+.sx .fspd{display:none}
+.sx #s-stage.fs .fspd{display:inline-flex;align-items:center;gap:4px;flex:none}
+.sx #s-stage.fs .fspd button{width:40px;height:40px;min-width:40px;min-height:40px;padding:0;font-size:1.2rem;background:var(--soft);color:var(--main)}
+.sx #s-stage.fs .fspd b{min-width:3.4em;text-align:center;font-variant-numeric:tabular-nums}
 .sx #s-stage.phone #s-fsset,.sx #s-stage.phone #s-fsx{display:none!important}
 .sx #s-stage.fs .ssheet{min-height:80px}
 .sx #s-stage.fs #fretRow{flex:none;margin:0}
@@ -4937,7 +4943,7 @@ function seek(t){const w=playing;pause();pos=Math.max(0,t);idx=vIdx=score?find(p
 $('play').onclick=()=>{if(!score)return;playing?pause():(pos>=score.end&&(pos=0),start())};
 $('stop').onclick=()=>seek(0);
 $('seek').oninput=e=>score&&seek(e.target.value/1000*score.end);
-function setSpeed(v){speed=v/100;if(playing){posStart=now();ctxStart=actx.currentTime}$('speed').value=v;upd();if(window.APP&&score)APP.sxBpm(Math.round(score.q0*60*speed))}
+function setSpeed(v){speed=v/100;if(playing){posStart=now();ctxStart=actx.currentTime}$('speed').value=v;upd();if($('fsv'))$('fsv').textContent=Math.round(v)+'%';if(window.APP&&score)APP.sxBpm(Math.round(score.q0*60*speed))}
 $('speed').oninput=e=>setSpeed(+e.target.value);
 $('pre').innerHTML=[50,75,100,125,150].map(v=>`<button data-s="${v}">${v}%</button>`).join('');
 $('pre').onclick=e=>{const b=e.target.closest('[data-s]');if(b)setSpeed(+b.dataset.s)};
@@ -5482,6 +5488,8 @@ window.__fretTick=t=>{const A=window.APP;if(!A||!score)return;const out=[];
  
  mv('libbox','sxLib');}
 {const mk=(id,t,l,f)=>{const b=document.createElement('button');b.id='s-'+id;b.className='fsb3';b.textContent=t;b.setAttribute('aria-label',l);b.onclick=f;return b};
+ {const w=document.createElement('span');w.className='fspd';w.innerHTML='<button id="s-fsm1" aria-label="Più lento">−</button><b id="s-fsv">100%</b><button id="s-fsp1" aria-label="Più veloce">+</button>';$('ctrl').appendChild(w);
+  $('fsm1').onclick=()=>setSpeed(Math.max(20,Math.round(speed*100)-5));$('fsp1').onclick=()=>setSpeed(Math.min(200,Math.round(speed*100)+5));}
  $('ctrl').prepend(mk('f1','▶','Suona',()=>{if(!score||playing)return;if(pos>=score.end-.01)pos=RG?RG.a:0;start()}),mk('f2','⏸','Pausa',()=>pause()),mk('f3','⏹','Stop',()=>stop()));}
 setSpeed(100);frame();
 window.SUONA={
