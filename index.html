@@ -270,7 +270,7 @@ button,select,.btn{border-radius:.7rem;font-weight:500}
 header .seg2{background:var(--soft);border-radius:.8rem;padding:2px;gap:2px}
 header .seg2 button{background:transparent!important;padding:.4rem .6rem;border-radius:.65rem}
 header .seg2 button:active{background:var(--card)!important}
-#thBtn{margin-left:auto}
+#thBtn,#setBtn{margin-left:auto}#thBtn+#setBtn{margin-left:0}
 .chin{position:absolute;transform:translate(-50%,-50%);z-index:30;width:7.5rem;font:700 16px system-ui,sans-serif;text-align:center;padding:.3rem .4rem;border:2px solid var(--main);border-radius:.6rem;background:#fff;color:#1c1c1e;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 /* sfondo chitarra della schermata iniziale (leggerissimo, si può togliere) */
 body.noScore:not(.noBgG) #wrap{background:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20200%20600%22%3E%3Cg%20transform%3D%22rotate%28-18%20100%20300%29%22%20fill%3D%22%238b5a2b%22%20stroke%3D%22%238b5a2b%22%20stroke-width%3D%222%22%20stroke-opacity%3D%22.16%22%3E%3Crect%20x%3D%2276%22%20y%3D%228%22%20width%3D%2248%22%20height%3D%2270%22%20rx%3D%2210%22%20fill-opacity%3D%22.08%22/%3E%3Crect%20x%3D%2288%22%20y%3D%2274%22%20width%3D%2224%22%20height%3D%22215%22%20fill-opacity%3D%22.1%22/%3E%3Cpath%20d%3D%22M100%20280C140%20280%20165%20300%20165%20340C165%20375%20145%20390%20148%20405C152%20420%20182%20435%20182%20480C182%20545%20140%20575%20100%20575C60%20575%2018%20545%2018%20480C18%20435%2048%20420%2052%20405C55%20390%2035%20375%2035%20340C35%20300%2060%20280%20100%20280Z%22%20fill-opacity%3D%22.07%22/%3E%3Ccircle%20cx%3D%22100%22%20cy%3D%22372%22%20r%3D%2222%22%20fill%3D%22none%22/%3E%3Crect%20x%3D%2272%22%20y%3D%22482%22%20width%3D%2256%22%20height%3D%2210%22%20rx%3D%223%22%20fill-opacity%3D%22.12%22/%3E%3Cg%20stroke-width%3D%22.8%22%3E%3Cpath%20d%3D%22M94%2020V487M98%2020V487M102%2020V487M106%2020V487%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") no-repeat right -30px bottom -20px/auto 78%;opacity:1}
@@ -336,7 +336,15 @@ body.sxMode #panel{flex:0 1 auto}
 .sx .fret{display:none!important}
 .sx #s-ctrl{margin:0;gap:.5rem}
 .sx #s-ctrl #s-play,.sx #s-ctrl #s-stop{display:none}
-.sx #s-stage.fs #s-play,.sx #s-stage.fs #s-stop{display:inline-flex}
+.sx .fsb3{display:none}
+.sx #s-stage.fs .fsb3{display:inline-flex;width:52px;height:52px;min-width:52px;padding:0;font-size:1.35rem;background:var(--soft);color:var(--main)}
+.sx #s-stage.fs #s-f1{background:var(--main)!important;color:#fff!important}
+.sx #s-stage.fs #s-play,.sx #s-stage.fs #s-stop{display:none!important}
+.sx #s-stage.fs .bar{flex:none;flex-wrap:nowrap;max-height:none;overflow:visible;padding:6px 8px}
+.sx #s-stage.fs #s-ctrl{flex:1 1 auto;flex-wrap:nowrap;gap:8px}
+.sx #s-stage.fs #s-fsm{display:none!important}
+.sx #s-stage.phone #s-fsset,.sx #s-stage.phone #s-fsx{display:none!important}
+.sx #s-stage.fs .ssheet{min-height:80px}
 .sx #s-stage.fs #fretRow{flex:none;margin:0}
 .sx #s-brkhint{margin:0}
 #sxLook .box{margin:.2rem 0;box-shadow:none;padding:.2rem 0;background:transparent}
@@ -881,6 +889,7 @@ if(!S.look5){ S.look5=1; Object.assign(S,{main:'#343a40',acc:'#1c7ed6',bg:'#f1f3
 if(!S.look7){ S.look7=1; Object.assign(S,{main:'#8b5a2b',acc:'#c0392b',bg:'#f7ecd9',ballC:null,nameC:null,chordC:null}); try{localStorage.setItem('spartitoChitarra',JSON.stringify(S));}catch(e){} }
 if(!S.look6){ S.look6=1; S.showNames=true; S.chordNames='name'; try{localStorage.setItem('spartitoChitarra',JSON.stringify(S));}catch(e){} }
 S.dyn=true;
+{ const sw=Math.min(screen.width||innerWidth,screen.height||innerHeight); S.fs=sw<=420?0.85:sw<=600?0.92:sw<=900?1:1.1; }
 if(!(+S.bpm>=20&&+S.bpm<=300)) S.bpm=DEF.bpm; else S.bpm=+S.bpm;
 // errori mostrati sullo schermo (così si capisce cosa non va nell'app)
 let _errN=0;
@@ -4947,7 +4956,7 @@ let RG=null,nb=null;const BPB=()=>{try{const t=score.staves[0].ms[0].ts;return M
 const fmt=s=>{s=Math.max(0,s);return Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0')};
 
 /* ---------- spartito ---------- */
-let sz=1;try{sz=+localStorage.getItem('ss_sz')||1}catch(e){}
+let sz=Math.max(.55,Math.min(1.2,(window.innerWidth||900)/900));
 function drawFace(c,x,y,r,t){const D='#1d2340',Yl='#ffc93c';c.save();c.lineCap='round';c.lineJoin='round';c.lineWidth=Math.max(1,r*.14);
  const dot=(a,b,q,f)=>{c.fillStyle=f||D;c.beginPath();c.arc(a,b,q,0,7);c.fill()};
  const heart=(a,b,q,f)=>{c.fillStyle=f;c.beginPath();c.moveTo(a,b+q*.9);c.bezierCurveTo(a-q*1.6,b-q*.2,a-q*.7,b-q*1.4,a,b-q*.45);c.bezierCurveTo(a+q*.7,b-q*1.4,a+q*1.6,b-q*.2,a,b+q*.9);c.fill()};
@@ -5103,12 +5112,14 @@ let bpr=4,ballOn=true,face='smile';try{if(localStorage.getItem('ss_v3')!=='1'){l
 let spF=1,rgF=1,shH=0;try{spF=+localStorage.getItem('ss_sp')||1;rgF=+localStorage.getItem('ss_rg')||1;shH=+localStorage.getItem('ss_sh')||0}catch(e){}
 const sv=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};let pt;const later=()=>{clearTimeout(pt);pt=setTimeout(renderSheet,150)};
 const syncP=()=>{$('pz').value=Math.round(sz*100);$('pb').value=Math.round(spF*100);$('pr').value=Math.round(rgF*100);$('ph').value=shH||64;$('sheet').style.height=shH?shH+'vh':''};
-const setSz=f=>{sz=Math.max(.5,Math.min(2.5,sz*f));sv('ss_sz',sz);syncP();renderSheet()};
+const setSz=f=>{sz=Math.max(.4,Math.min(4,sz*f));sv('ss_sz',sz);syncP();renderSheet()};
 $('sIn').onclick=$('fzi').onclick=()=>setSz(1.15);$('sOut').onclick=$('fzo').onclick=()=>setSz(1/1.15);
-{let d0=0,r=1;const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY),sh=$('sheet'),inn=$('sin');
- sh.addEventListener('touchstart',e=>{if(e.touches.length===2){d0=dist(e.touches);r=1;inn.style.transformOrigin='0 0'}},{passive:true});
- sh.addEventListener('touchmove',e=>{if(d0&&e.touches.length===2){e.preventDefault();r=Math.max(.5/sz,Math.min(2.5/sz,dist(e.touches)/d0));inn.style.transform=`scale(${r})`}},{passive:false});
- sh.addEventListener('touchend',()=>{if(!d0)return;d0=0;inn.style.transform='';if(Math.abs(r-1)>.03)setSz(r)});}
+{let d0=0,r=1,c0={x:0,y:0},t0=0;const sh=$('sheet'),inn=$('sin'),dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+ sh.style.touchAction='pan-x pan-y';
+ sh.addEventListener('touchstart',e=>{if(e.touches.length===2){e.preventDefault();d0=dist(e.touches);r=1;t0=sh.scrollTop;const b=inn.getBoundingClientRect();c0={x:(e.touches[0].clientX+e.touches[1].clientX)/2-b.left,y:(e.touches[0].clientY+e.touches[1].clientY)/2-b.top};inn.style.transformOrigin=c0.x+'px '+c0.y+'px'}},{passive:false});
+ sh.addEventListener('touchmove',e=>{if(d0&&e.touches.length===2){e.preventDefault();r=Math.max(.4/sz,Math.min(4/sz,dist(e.touches)/d0));inn.style.transform='scale('+r+')'}},{passive:false});
+ const end=()=>{if(!d0)return;d0=0;inn.style.transform='';if(Math.abs(r-1)>.03){const sy=c0.y-t0;setSz(r);sh.scrollTop=Math.max(0,c0.y*r-sy)}};
+ sh.addEventListener('touchend',end);sh.addEventListener('touchcancel',end);}
 $('pz').oninput=e=>{sz=e.target.value/100;sv('ss_sz',sz);later()};
 $('pb').oninput=e=>{spF=e.target.value/100;sv('ss_sp',spF);later()};
 $('pr').oninput=e=>{rgF=e.target.value/100;sv('ss_rg',rgF);later()};
@@ -5470,6 +5481,8 @@ window.__fretTick=t=>{const A=window.APP;if(!A||!score)return;const out=[];
  
  
  mv('libbox','sxLib');}
+{const mk=(id,t,l,f)=>{const b=document.createElement('button');b.id='s-'+id;b.className='fsb3';b.textContent=t;b.setAttribute('aria-label',l);b.onclick=f;return b};
+ $('ctrl').prepend(mk('f1','▶','Suona',()=>{if(!score||playing)return;if(pos>=score.end-.01)pos=RG?RG.a:0;start()}),mk('f2','⏸','Pausa',()=>pause()),mk('f3','⏹','Stop',()=>stop()));}
 setSpeed(100);frame();
 window.SUONA={
  async open(f){
