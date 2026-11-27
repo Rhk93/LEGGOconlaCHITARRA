@@ -5120,12 +5120,16 @@ const sv=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};let pt;const later=()
 const syncP=()=>{$('pz').value=Math.round(sz*100);$('pb').value=Math.round(spF*100);$('pr').value=Math.round(rgF*100);$('ph').value=shH||64;$('sheet').style.height=shH?shH+'vh':''};
 const setSz=f=>{sz=Math.max(.4,Math.min(4,sz*f));sv('ss_sz',sz);syncP();renderSheet()};
 $('sIn').onclick=$('fzi').onclick=()=>setSz(1.15);$('sOut').onclick=$('fzo').onclick=()=>setSz(1/1.15);
-{let d0=0,r=1,c0={x:0,y:0},t0=0;const sh=$('sheet'),inn=$('sin'),dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+{let d0=0,r=1,c0={x:0,y:0},t0=0,on=false;const sh=$('sheet'),st=$('stage'),inn=$('sin'),dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
  sh.style.touchAction='pan-x pan-y';
- sh.addEventListener('touchstart',e=>{if(e.touches.length===2){e.preventDefault();d0=dist(e.touches);r=1;t0=sh.scrollTop;const b=inn.getBoundingClientRect();c0={x:(e.touches[0].clientX+e.touches[1].clientX)/2-b.left,y:(e.touches[0].clientY+e.touches[1].clientY)/2-b.top};inn.style.transformOrigin=c0.x+'px '+c0.y+'px'}},{passive:false});
- sh.addEventListener('touchmove',e=>{if(d0&&e.touches.length===2){e.preventDefault();r=Math.max(.4/sz,Math.min(4/sz,dist(e.touches)/d0));inn.style.transform='scale('+r+')'}},{passive:false});
- const end=()=>{if(!d0)return;d0=0;inn.style.transform='';if(Math.abs(r-1)>.03){const sy=c0.y-t0;setSz(r);sh.scrollTop=Math.max(0,c0.y*r-sy)}};
- sh.addEventListener('touchend',end);sh.addEventListener('touchcancel',end);}
+ const begin=(cx,cy)=>{on=true;r=1;t0=sh.scrollTop;const b=inn.getBoundingClientRect();c0={x:cx-b.left,y:cy-b.top};inn.style.transformOrigin=c0.x+'px '+c0.y+'px';inn.style.willChange='transform'};
+ const live=k=>{r=Math.max(.4/sz,Math.min(4/sz,k));inn.style.transform='scale('+r+')'};
+ const end=()=>{if(!on)return;on=false;d0=0;inn.style.transform='';inn.style.willChange='';if(Math.abs(r-1)>.03){const sy=c0.y-t0;setSz(r);sh.scrollTop=Math.max(0,c0.y*r-sy)}};
+ st.addEventListener('touchstart',e=>{if(e.touches.length===2&&sh.contains(e.target)||e.touches.length===2&&on){e.preventDefault();d0=dist(e.touches);begin((e.touches[0].clientX+e.touches[1].clientX)/2,(e.touches[0].clientY+e.touches[1].clientY)/2)}},{passive:false,capture:true});
+ st.addEventListener('touchmove',e=>{if(on&&d0&&e.touches.length===2){if(e.cancelable)e.preventDefault();live(dist(e.touches)/d0)}},{passive:false,capture:true});
+ st.addEventListener('touchend',e=>{if(on&&e.touches.length<2)end()},{capture:true});st.addEventListener('touchcancel',()=>end(),{capture:true});
+ ['gesturestart','gesturechange','gestureend'].forEach(n=>st.addEventListener(n,e=>{e.preventDefault();if(n==='gesturestart'&&!on)begin(e.clientX||innerWidth/2,e.clientY||innerHeight/2);else if(n==='gesturechange'&&on&&!d0)live(e.scale);else if(n==='gestureend'&&!d0)end()},{passive:false}));
+ let wk=1,wt=0;st.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();if(!on){begin(e.clientX,e.clientY);wk=1}wk*=Math.exp(-e.deltaY*0.01);live(wk);clearTimeout(wt);wt=setTimeout(()=>{end();wk=1},200)},{passive:false});}
 $('pz').oninput=e=>{sz=e.target.value/100;sv('ss_sz',sz);later()};
 $('pb').oninput=e=>{spF=e.target.value/100;sv('ss_sp',spF);later()};
 $('pr').oninput=e=>{rgF=e.target.value/100;sv('ss_rg',rgF);later()};
